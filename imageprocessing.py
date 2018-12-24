@@ -112,5 +112,5 @@ def get_windows(image_in, segments_in, count_in):
     
     return return_bool
 
-
+  
 get_windows(image, 20, 0)
