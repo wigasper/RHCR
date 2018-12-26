@@ -63,18 +63,18 @@ def get_windows_helper(image_in, segments_in, count_in):
     # responses from the model
     sample_data = [[]]
     
-    x_offset = image.width / segments
-    y_offset = x_offset * window_height
+    x_size = image.width / segments
+    y_size = x_size * window_height
     y = 0 
     
-    if (x_offset <= 30):
+    if (x_size <= 30):
         return_bool = True
     else:
         for horizontal in tqdm(range(0, segments * spacer_tuning_val)):   
             x = 0
             for vertical in range(0, segments * spacer_tuning_val):
                 # crop out the window
-                image_out = image.crop(box=(x, y, x + x_offset, y + y_offset))
+                image_out = image.crop(box=(x, y, x + x_size, y + y_size))
                 
                 # to nparray
                 image_out = np.array(image_out)
@@ -97,11 +97,11 @@ def get_windows_helper(image_in, segments_in, count_in):
                     plt.imsave("./crops/{}.jpg".format(window_id), image_out)
                     
                     # data out format: [ID, x_min, x max, y_min, y_max]
-                    sample_data.append([window_id, int(x), int(x + x_offset), 
-                                        int(y), int(y + y_offset)])
+                    sample_data.append([window_id, int(x), int(x + x_size), 
+                                        int(y), int(y + y_size)])
                     count += 1
-                x += x_offset / spacer_tuning_val
-            y += y_offset / spacer_tuning_val
+                x += x_size / spacer_tuning_val
+            y += y_size / spacer_tuning_val
         return get_windows_helper(image, shrink_factor, count)
     
     return return_bool
