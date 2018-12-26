@@ -33,7 +33,7 @@ image_id = 1
 # print("Image size: " + repr(cropped_image.size) + " pixels")
 
 def get_windows(image_in):
-    get_windows_helper(image, 20, 0)
+    get_windows_helper(image_in, 20, 0)
     
 def get_windows_helper(image_in, segments_in, count_in):
     # Arguments
