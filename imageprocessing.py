@@ -1,11 +1,3 @@
-
-=======
-#!/usr/bin/env python
-# coding: utf-8
-
-# Sandbox area for working with images and building sliding windows
-
-
 import os
 import matplotlib.pyplot as plt
 import numpy as np
@@ -40,7 +32,10 @@ image_id = 1
 # image size in pixels
 # print("Image size: " + repr(cropped_image.size) + " pixels")
 
-def get_windows(image_in, segments_in, count_in):
+def get_windows(image_in):
+    get_windows_helper(image_in, 20, 0)
+    
+def get_windows_helper(image_in, segments_in, count_in):
     # Arguments
     #    image_in: The original image to be successively cropped
     #        into smaller and smaller pieces.
@@ -62,7 +57,7 @@ def get_windows(image_in, segments_in, count_in):
     
     # window height factor
     window_height = 2
-
+    
     # sample_data can store as follows: [ID, x_min, x max, y_min, y_max] 
     # This will eventually be needed for assigning location to positive 
     # responses from the model
@@ -70,7 +65,6 @@ def get_windows(image_in, segments_in, count_in):
     
     x_size = image.width / segments
     y_size = x_size * window_height
-    
     y = 0 
     
     if (x_size <= 30):
@@ -103,17 +97,14 @@ def get_windows(image_in, segments_in, count_in):
                     plt.imsave("./crops/{}.jpg".format(window_id), image_out)
                     
                     # data out format: [ID, x_min, x max, y_min, y_max]
-
-                    sample_data.append([window_id, int(x), int(x + x_offset), 
-                                        int(y), int(y + y_offset)])
-                x += x_offset / spacer_tuning_val
-                count += 1
-                
-            y += y_offset / spacer_tuning_val
-        
-        return get_windows(image, shrink_factor, count)
+                    sample_data.append([window_id, int(x), int(x + x_size), 
+                                        int(y), int(y + y_size)])
+                    count += 1
+                x += x_size / spacer_tuning_val
+            y += y_size / spacer_tuning_val
+        return get_windows_helper(image, shrink_factor, count)
     
     return return_bool
 
-  
-get_windows(image, 20, 0)
+
+get_windows(image)
