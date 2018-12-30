@@ -1,7 +1,10 @@
+
+=======
 #!/usr/bin/env python
 # coding: utf-8
 
 # Sandbox area for working with images and building sliding windows
+
 
 import os
 import matplotlib.pyplot as plt
@@ -37,7 +40,6 @@ image_id = 1
 # image size in pixels
 # print("Image size: " + repr(cropped_image.size) + " pixels")
 
-
 def get_windows(image_in, segments_in, count_in):
     # Arguments
     #    image_in: The original image to be successively cropped
@@ -60,24 +62,25 @@ def get_windows(image_in, segments_in, count_in):
     
     # window height factor
     window_height = 2
-    
+
     # sample_data can store as follows: [ID, x_min, x max, y_min, y_max] 
     # This will eventually be needed for assigning location to positive 
     # responses from the model
     sample_data = [[]]
     
-    x_offset = image.width / segments
-    y_offset = x_offset * window_height
+    x_size = image.width / segments
+    y_size = x_size * window_height
+    
     y = 0 
     
-    if (x_offset <= 30):
+    if (x_size <= 30):
         return_bool = True
     else:
         for horizontal in tqdm(range(0, segments * spacer_tuning_val)):   
             x = 0
             for vertical in range(0, segments * spacer_tuning_val):
                 # crop out the window
-                image_out = image.crop(box=(x, y, x + x_offset, y + y_offset))
+                image_out = image.crop(box=(x, y, x + x_size, y + y_size))
                 
                 # to nparray
                 image_out = np.array(image_out)
@@ -100,9 +103,9 @@ def get_windows(image_in, segments_in, count_in):
                     plt.imsave("./crops/{}.jpg".format(window_id), image_out)
                     
                     # data out format: [ID, x_min, x max, y_min, y_max]
+
                     sample_data.append([window_id, int(x), int(x + x_offset), 
                                         int(y), int(y + y_offset)])
-
                 x += x_offset / spacer_tuning_val
                 count += 1
                 
