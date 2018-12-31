@@ -10,73 +10,33 @@ os.chdir('/Users/wigasper/Documents/Python/English Practice')
 image = load_img("./RGALI Documents/1.tif", color_mode='grayscale',
                  target_size=None)
 
-# these fields are here for future use. They probably will need to be moved
-# when everything is scaled. image_id will obviously need to be set for each
-# image.
 image_id = 1
 
-# can also use imageObject.show() (non static)
-# plt.imshow(image)x
-# plt.show()
-#
-# image size in pixels
-# print("Image size: " + repr(image.size) + " pixels")
-#
-# imageObject.crop(x1, y1, x2, y2) w/ top left at (0,0)
-# cropped_image = image.crop(box=(0, 0, 1000, 1000))
-#
-# show cropped image
-# plt.imshow(cropped_image)
-# plt.show()
-#
-# image size in pixels
-# print("Image size: " + repr(cropped_image.size) + " pixels")
-
-def get_windows(image_in):
-    get_windows_helper(image_in, 20, 0)
-    
-def get_windows_helper(image_in, segments_in, count_in):
-    # Arguments
+def window_gen(image_in):
     #    image_in: The original image to be successively cropped
     #        into smaller and smaller pieces.
-    #    segments_in: The number of segments each side will be
-    #        divided into. Specified initially and then reduced
-    #        with each recursive call.
-    #    count_in: The accumulator for image file labels. Should
-    #        initially be zero, increased with every crop and passed
-    #        with each recursive call.
 
-    return_bool = False
-    segments = segments_in
+    segments = 20
     image = image_in
-    count = count_in
-    shrink_factor = int(segments * 1.25)
+    count = 0
 
     # tuning value for optimizing window spacing
     spacer_tuning_val = 3
     
-    # window height factor
+    # window height as a factor of window width
     window_height = 2
     
-    # sample_data can store as follows: [ID, x_min, x max, y_min, y_max] 
-    # This will eventually be needed for assigning location to positive 
-    # responses from the model
-    sample_data = [[]]
-    
-    x_size = image.width / segments
-    y_size = x_size * window_height
-    y = 0 
-    
-    if (x_size <= 30):
-        return_bool = True
-    else:
+    crop_width = image.width / segments
+    crop_height = crop_width * window_height
+
+    while crop_width > 30:
+        y = 0 
         for horizontal in tqdm(range(0, segments * spacer_tuning_val)):   
             x = 0
             for vertical in range(0, segments * spacer_tuning_val):
-                # crop out the window
-                image_out = image.crop(box=(x, y, x + x_size, y + y_size))
+                image_out = image.crop(box=(x, y, x + crop_width,
+                                            y + crop_height))
                 
-                # to nparray
                 image_out = np.array(image_out)
                 
                 # increase contrast. These values may need to be optimized
@@ -85,26 +45,34 @@ def get_windows_helper(image_in, segments_in, count_in):
 
                 # save image if it is not all white or all black
                 if image_out.mean() > 115.0 and image_out.mean() < 250.0:
-                    # normalization - not necessary if saving
-                    # image_out = image_out / 255.0
-                    
-                    # resize
+                    #image_out = image_out / 255.0
                     image_out = resize(image_out, (100, 50))
-                
                     window_id = "".join([str(image_id).zfill(4), 
                                          str(count).zfill(5)])
     
-                    plt.imsave("./crops/{}.jpg".format(window_id), image_out)
+                    # output: [image as np array, ID, x min, x max, y min,
+                    #           y max]
+                    output = [image_out, window_id, int(x), 
+                              int(x + crop_width), int(y), 
+                              int(y + crop_height)]
+                    yield output
                     
-                    # data out format: [ID, x_min, x max, y_min, y_max]
-                    sample_data.append([window_id, int(x), int(x + x_size), 
-                                        int(y), int(y + y_size)])
                     count += 1
-                x += x_size / spacer_tuning_val
-            y += y_size / spacer_tuning_val
-        return get_windows_helper(image, shrink_factor, count)
-    
-    return return_bool
+                x += crop_width / spacer_tuning_val
+            y += crop_height / spacer_tuning_val
+        
+        segments = int(segments * 1.25)
+        crop_width = image.width / segments
+        crop_height = crop_width * window_height
 
 
-get_windows(image)
+#window_gen(image)
+#gen = window_gen(image)
+#sample = next(gen)
+#plt.imshow(sample[0])
+
+# to save images:
+gen = window_gen(image)
+for window in gen:
+    plt.imsave("./crops/{}.jpg".format(window[1]), window[0])
+
