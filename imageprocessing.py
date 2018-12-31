@@ -13,9 +13,7 @@ image = load_img("./RGALI Documents/1.tif", color_mode='grayscale',
 image_id = 1
 
 def window_gen(image_in):
-    #    image_in: The original image to be successively cropped
-    #        into smaller and smaller pieces.
-
+    
     segments = 20
     image = image_in
     count = 0
@@ -42,7 +40,7 @@ def window_gen(image_in):
                 image_out[image_out < 100.0] = 1.0
                 image_out[image_out > 180.0] = 255.0
 
-                # save image if it is not all white or all black
+                # output image if it is not all white or all black
                 if image_out.mean() > 115.0 and image_out.mean() < 250.0:
                     image_out = image_out / 255.0
                     image_out = resize(image_out, (100, 50))
@@ -51,10 +49,9 @@ def window_gen(image_in):
     
                     # output: [image as np array, ID, x min, x max, y min,
                     #           y max]
-                    output = [image_out, window_id, int(x), 
+                    yield [image_out, window_id, int(x), 
                               int(x + crop_width), int(y), 
                               int(y + crop_height)]
-                    yield output
                     
                     count += 1
                 x += crop_width / spacer_tuning_val
@@ -64,11 +61,6 @@ def window_gen(image_in):
         crop_width = image.width / segments
         crop_height = crop_width * window_height
 
-
-#window_gen(image)
-#gen = window_gen(image)
-#sample = next(gen)
-#plt.imshow(sample[0])
 
 # to save images:
 gen = window_gen(image)
