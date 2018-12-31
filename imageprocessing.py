@@ -36,7 +36,6 @@ def window_gen(image_in):
             for vertical in range(0, segments * spacer_tuning_val):
                 image_out = image.crop(box=(x, y, x + crop_width,
                                             y + crop_height))
-                
                 image_out = np.array(image_out)
                 
                 # increase contrast. These values may need to be optimized
@@ -45,7 +44,7 @@ def window_gen(image_in):
 
                 # save image if it is not all white or all black
                 if image_out.mean() > 115.0 and image_out.mean() < 250.0:
-                    #image_out = image_out / 255.0
+                    image_out = image_out / 255.0
                     image_out = resize(image_out, (100, 50))
                     window_id = "".join([str(image_id).zfill(4), 
                                          str(count).zfill(5)])
