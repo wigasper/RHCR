@@ -16,7 +16,7 @@ def format_line(line, max_width=120):
     while len(line) > 0:
         out = line[0]
         line = line[1:]
-        while len(line) > 0 and (len(out) + len(line[0]) + 1 < max_width):
+        while len(line) > 0 and len(out) + len(line[0]) + 1 < max_width:
             out = " ".join([out, line[0]])
             line = line[1:]
         yield out
@@ -56,16 +56,15 @@ class traindatagen:
             # haven't tested sys.sdtin usage
             for line in sys.stdin.read():
                 for frmtd_line in format_line(line):
-                        doc.append(frmtd_line)
+                    doc.append(frmtd_line)
 
         #########################################
         # for testing in IDE, read in doc:
-        with open("./traindatagen/cyrillic.3.test", "r") as handle:
-                for line in handle:
-                    for frmtd_line in format_line(line):
-                        doc.append(frmtd_line)
+#        with open("./traindatagen/cyrillic.3.test", "r") as handle:
+#                for line in handle:
+#                    for frmtd_line in format_line(line):
+#                        doc.append(frmtd_line)
         #########################################
-        
         
         # Build dict
         letters_dict = {}
@@ -74,7 +73,7 @@ class traindatagen:
                 line = line.strip("\n").split(",")
                 letters_dict[line[0]] = line[1]
         
-        for letter in letters_dict.keys():
+        for letter in letters_dict:
             fp ="./traindatagen/letters/{}.png".format(letters_dict[letter])
             letters_dict[letter] = np.array(load_img(fp, color_mode="grayscale"))
         
