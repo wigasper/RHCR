@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
 import sys
-import getopt
+import logging
+import argparse
 
 from keras.preprocessing.image import load_img
 import matplotlib.pyplot as plt
@@ -21,34 +22,26 @@ def format_line(line, max_width=120):
             line = line[1:]
         yield out
 
-
-def usage():
-    print("\nUsage: ", sys.argv[0], " \n")
-
 class traindatagen:
     
     def main():
-        options = {}
         doc = []
+        parser = argparse.ArgumentParser()
+        parser.add_argument("-i", "--input", help="input file path")
+        args = parser.parse_args()
         
-        try:
-            opts, args = getopt.getopt(sys.argv[1:], "i:")
-        
-        except getopt.GetoptError as err:
-            sys.stdout = sys.stderr
+        # Set up logger
+        logger = logging.getLogger(__name__)
+        logger.setLevel(logging.INFO)
+        handler = logging.FileHandler("./traindatagen/traindatagen.log")
+        formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
 
-            print(str(err))
-
-            usage()
-
-            sys.exit(2)
             
-        for (opt, arg) in opts:
-            options[opt] = arg
-            
-        if "-i" in options.keys():
+        if args.input:
             # Read in document to transform to cursive
-            with open(options["-i"], "r") as handle:
+            with open(args.input, "r") as handle:
                 for line in handle:
                     for frmtd_line in format_line(line):
                         doc.append(frmtd_line)
@@ -60,10 +53,10 @@ class traindatagen:
 
         #########################################
         # for testing in IDE, read in doc:
-#        with open("./traindatagen/cyrillic.3.test", "r") as handle:
-#                for line in handle:
-#                    for frmtd_line in format_line(line):
-#                        doc.append(frmtd_line)
+        with open("./traindatagen/cyrillic.3.test", "r") as handle:
+                for line in handle:
+                    for frmtd_line in format_line(line):
+                        doc.append(frmtd_line)
         #########################################
         
         # Build dict
@@ -83,9 +76,12 @@ class traindatagen:
         # Change each letter to a cursive image
         out = []
         for line in doc:
-            ###########
-            # Remove conditional here once we have all letters!!!!!!!
-            line = [letters_dict[letter] for letter in line if letter in letters_dict.keys()]
+            line_out = []
+            for letter in line:
+                try:
+                    line_out.append(letters_dict[letter])
+                except KeyError:
+                    logger.error("Symbol {} not in dict".format(letter))
             out.append(np.hstack(tuple(line)))
 
         # Get max width
@@ -102,7 +98,7 @@ class traindatagen:
         # Combine vertically
         out = np.vstack(tuple(out))
         
-        plt.imsave("./traindatagen/test.jpg", out, cmap='gray')
+        plt.imsave("./traindatagen/test3.jpg", out, cmap='gray')
         
     if __name__ == '__main__':
         main()
