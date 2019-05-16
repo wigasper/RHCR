@@ -82,7 +82,7 @@ class traindatagen:
                     line_out.append(letters_dict[letter])
                 except KeyError:
                     logger.error("Symbol {} not in dict".format(letter))
-            out.append(np.hstack(tuple(line)))
+            out.append(np.hstack(tuple(line_out)))
 
         # Get max width
         width = max([line.shape[1] for line in out])
