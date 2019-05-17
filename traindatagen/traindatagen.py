@@ -65,7 +65,7 @@ class traindatagen:
             if out_path.split(".")[-1] not in supported_formats:
                 out_path = "".join([out_path, ".png"])
         else:
-            out_path = "{}.png".format(time.asctime())
+            out_path = f"{time.asctime()}.png"
             
         #########################################
         # for testing in IDE, read in doc:
@@ -83,7 +83,7 @@ class traindatagen:
                 letters_dict[line[0]] = line[1]
         
         for letter in letters_dict:
-            fp ="letters/{}.png".format(letters_dict[letter])
+            fp =f"letters/{letters_dict[letter]}.png"
             letters_dict[letter] = np.array(load_img(fp, color_mode="grayscale"))
         
         # Whitespace, should make this variable for inconsistent spacing
@@ -97,7 +97,7 @@ class traindatagen:
                 try:
                     line_out.append(letters_dict[letter])
                 except KeyError:
-                    logger.error("Symbol {} not in dict".format(letter))
+                    logger.error(f"Symbol {letter} not in dict")
             out.append(np.hstack(tuple(line_out)))
 
         # Get max width
@@ -114,8 +114,8 @@ class traindatagen:
         # Combine vertically
         out = np.vstack(tuple(out))
         
-        plt.imsave("{}".format(out_path), out, cmap='gray')
-        logger.info("Translated {} to {}".format(in_path, out_path))
+        plt.imsave(f"{out_path}", out, cmap='gray')
+        logger.info(f"Translated {in_path} to {out_path}")
         
     if __name__ == '__main__':
         main()
