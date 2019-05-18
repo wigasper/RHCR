@@ -4,16 +4,14 @@ import sys
 import time
 import logging
 import argparse
+import traceback
 
 from keras.preprocessing.image import load_img
 import matplotlib.pyplot as plt
 import numpy as np
 
-# This is a quick and dirty formatting method to ensure that line widths
-# are reasonable if input doc does not have newlines
-# Adds words to lines until the next word would put it over the max width
-# Then yields the line
 def format_line(line, max_width=90):
+    ''' Ensures that lines of text terminate reasonably even if document has no newlines '''
     line = line.split()
     while len(line) > 0:
         out = line[0]
@@ -22,6 +20,58 @@ def format_line(line, max_width=90):
             out = " ".join([out, line[0]])
             line = line[1:]
         yield out
+
+def txt_to_cursive_img(doc, letters_dict, logger):
+    ''' turns a document text into cursive images using the dictionary
+        :params:
+            doc- array of lines of text
+            letters_dict - dictionary of str letters into cursive letter images
+            logger- log object
+        :return:
+            array of b&w images of cursive letters
+    '''
+    try:
+        out = []
+        for line in doc:
+            line_out = []
+            for letter in line:
+                try:
+                    line_out.append(letters_dict[letter])
+                except KeyError:
+                    logger.error(f"Symbol {letter} not in dict")
+                    raise
+            out.append(np.hstack(tuple(line_out)))
+        return out
+
+    except Exception as e:
+        traceback.print_exc()
+        trace = traceback.format_exc()
+        logger.error(repr(e))
+        logger.critical(trace)
+        raise
+
+
+def final_format(imgdoc, logger):
+    ''' turns the array of lines of text images into a single document image '''
+    try:
+        # Get max width
+        width = max([line.shape[1] for line in imgdoc])
+        # Pad all lines to max width
+        index = 0
+        for line in imgdoc:
+            if line.shape[1] < width:
+                pad = np.ones((line.shape[0], (width - line.shape[1]))) * 255
+                imgdoc[index] = np.hstack((line, pad))
+            index += 1
+        # Combine vertically
+        return np.vstack(tuple(imgdoc))
+
+    except Exception as e:
+        traceback.print_exc()
+        trace = traceback.format_exc()
+        logger.error(repr(e))
+        logger.critical(trace)
+        raise
 
 class traindatagen:
     
@@ -92,29 +142,11 @@ class traindatagen:
         letters_dict[' '] = np.ones((127,40)) * 255
         
         # Change each letter to a cursive image
-        out = []
-        for line in doc:
-            line_out = []
-            for letter in line:
-                try:
-                    line_out.append(letters_dict[letter])
-                except KeyError:
-                    logger.error(f"Symbol {letter} not in dict")
-            out.append(np.hstack(tuple(line_out)))
-
-        # Get max width
-        width = max([line.shape[1] for line in out])
-        
-        # Pad all lines to max width
-        index = 0
-        for line in out:
-            if line.shape[1] < width:
-                pad = np.ones((line.shape[0], (width - line.shape[1]))) * 255
-                out[index] = np.hstack((line, pad))
-            index += 1
-
-        # Combine vertically
-        out = np.vstack(tuple(out))
+        logger.info('converting string doc to cursive images')
+        out = txt_to_cursive_img(doc)
+        # pad lines, format nice into a final image for the whole document
+        logger.info('formatting doc')
+        out = final_format(out)
         
         plt.imsave(f"{out_path}", out, cmap='gray')
         logger.info(f"Translated {in_path} to {out_path}")
