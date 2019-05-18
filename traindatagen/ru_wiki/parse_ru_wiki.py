@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from random import random
+from random import random, randint
 
 def random_punctuator(word):
     if random() < .08:
@@ -10,9 +10,12 @@ def random_punctuator(word):
         return "".join([word, "?"])
     if random() < .04:
         if random() < .51:
-            return "".join([word, '"'])
+            if random() < .51:
+                return "".join([word, '"'])
+            else:
+                return "".join(['"', word])
         else:
-            return "".join(['"', word])
+            return "".join([word, " - "])
     return word
 
 def format_line(line, max_width=50):
@@ -42,6 +45,9 @@ with open("ruwiki.test", "r") as fp:
         for char in line:
             if char in valid_letters:
                 line_out = "".join([line_out, char])
-        line_out = " ".join(line_out.split())
+        line_out = line_out.split()
+        if random() < .007:
+            line_out.append(str(randint(0, 10000)))
+        line_out = " ".join(line_out)
         if line_out:        
             out = " ".join([out, line_out])
