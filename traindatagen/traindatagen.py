@@ -65,7 +65,9 @@ class traindatagen:
             if out_path.split(".")[-1] not in supported_formats:
                 out_path = "".join([out_path, ".png"])
         else:
-            out_path = f"{in_path.split("/")[-1].split(".")[:-1]}.png"
+            out_path = in_path.split("/")[-1]
+            out_path = "".join(out_path.split(".")[:-1])
+            out_path = f"{out_path}.png"
             
         #########################################
         # for testing in IDE, read in doc:
