@@ -30,8 +30,8 @@ class traindatagen:
         
         # Get command line args
         parser = argparse.ArgumentParser()
-        parser.add_argument("-i", "--input", help="input file path")
-        parser.add_argument("-o", "--output", help="output file path")
+        parser.add_argument("-i", "--input", help="input file path", type=str, nargs=1)
+        parser.add_argument("-o", "--output", help="output file path", type=str, nargs=1)
         args = parser.parse_args()
         
         # Set up logger
