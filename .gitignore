@@ -2,3 +2,4 @@
 /traindatagen/ru_wiki/generated_text
 *.test
 *.log
+*/*.test
