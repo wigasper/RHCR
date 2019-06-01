@@ -28,23 +28,42 @@ def txt_to_cursive_img(doc, logger):
             doc- list of lines of text
             logger- log object
         :return:
-            array of b&w images of cursive letters
+            a PIL Image object
     '''
     try:
-        width = 2700
-        height = 4000
+        # line_buffer is the pixel spacing between lines
+        line_buffer = 15
+        # Get a random font
+        fonts = os.listdir("./fonts")
+        font = ImageFont.truetype(f"./fonts/{fonts[randint(0,2)]}", 120)
+
+        # Get max line width and document height
+        # Image and Draw objects need to be instantiated because textsize() can't
+        # be called statically
+        width = 1
+        height = 1
+        img = Image.new('L', (width, height), 255)
+        draw = ImageDraw.Draw(img)
+        max_width = 0
+        current_height = 0
+        for line in doc:
+            text_w, text_h = draw.textsize(line, font=font)
+            if text_w > max_width:
+                max_width = text_w
+            current_height = current_height + text_h + line_buffer
+
+        # Now build the actual image
+        width = max_width + 60
+        height = current_height + 80
 
         img = Image.new('L', (width, height), 255)
         draw = ImageDraw.Draw(img)
-
-        fonts = os.listdir("./fonts")
-        font = ImageFont.truetype(f"./fonts/{fonts[randint(0,2)]}", 120)
 
         current_height = 30
         for line in doc:
             text_w, text_h = draw.textsize(line, font=font)
             draw.text((30, current_height), line, font=font, fill=0)
-            current_height = current_height + text_h + 15
+            current_height = current_height + text_h + line_buffer
         
         return img
 
