@@ -33,9 +33,10 @@ def txt_to_cursive_img(doc, logger):
     try:
         # line_buffer is the pixel spacing between lines
         line_buffer = 15
+
         # Get a random font
         fonts = os.listdir("./fonts")
-        font = ImageFont.truetype(f"./fonts/{fonts[randint(0,2)]}", 120)
+        font = ImageFont.truetype(f"./fonts/{fonts[randint(0, len(fonts) - 1)]}", 120)
 
         # Get max line width and document height
         # Image and Draw objects need to be instantiated because textsize() can't
