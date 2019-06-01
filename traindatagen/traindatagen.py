@@ -34,16 +34,21 @@ def txt_to_cursive_img(doc, logger):
         # line_buffer is the pixel spacing between lines
         line_buffer = 15
 
+        # pad the left and right sides of the text so that they aren't up against
+        # the side of the doc
+        side_pad = 30
+
+        # pad header and footer
+        head_foot_pad = 40
+
         # Get a random font
         fonts = os.listdir("./fonts")
         font = ImageFont.truetype(f"./fonts/{fonts[randint(0, len(fonts) - 1)]}", 120)
 
         # Get max line width and document height
         # Image and Draw objects need to be instantiated because textsize() can't
-        # be called statically
-        width = 1
-        height = 1
-        img = Image.new('L', (width, height), 255)
+        # be called statically. Image object params are not important here
+        img = Image.new('L', (1, 1), 255)
         draw = ImageDraw.Draw(img)
         max_width = 0
         current_height = 0
@@ -54,16 +59,16 @@ def txt_to_cursive_img(doc, logger):
             current_height = current_height + text_h + line_buffer
 
         # Now build the actual image
-        width = max_width + 60
-        height = current_height + 80
+        width = max_width + (side_pad * 2)
+        height = current_height + (head_foot_pad * 2)
 
         img = Image.new('L', (width, height), 255)
         draw = ImageDraw.Draw(img)
 
-        current_height = 30
+        current_height = head_foot_pad
         for line in doc:
             text_w, text_h = draw.textsize(line, font=font)
-            draw.text((30, current_height), line, font=font, fill=0)
+            draw.text((side_pad, current_height), line, font=font, fill=0)
             current_height = current_height + text_h + line_buffer
         
         return img
