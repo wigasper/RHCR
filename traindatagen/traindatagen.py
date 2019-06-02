@@ -36,13 +36,14 @@ def txt_to_cursive_img(doc, logger):
 
         # pad the left and right sides of the text so that they aren't up against
         # the side of the doc
-        side_pad = 30
+        side_pad = 40
 
         # pad header and footer
         head_foot_pad = 40
 
         # Get a random font
         fonts = os.listdir("./fonts")
+        #font = ImageFont.truetype("./fonts/Montekky.ttf", 120)
         font = ImageFont.truetype(f"./fonts/{fonts[randint(0, len(fonts) - 1)]}", 120)
 
         # Get max line width and document height
@@ -51,26 +52,58 @@ def txt_to_cursive_img(doc, logger):
         img = Image.new('L', (1, 1), 255)
         draw = ImageDraw.Draw(img)
         max_width = 0
-        current_height = 0
+        current_y = 0
         for line in doc:
             text_w, text_h = draw.textsize(line, font=font)
             if text_w > max_width:
                 max_width = text_w
-            current_height = current_height + text_h + line_buffer
-
+            current_y = current_y + text_h + line_buffer
+        
         # Now build the actual image
         width = max_width + (side_pad * 2)
-        height = current_height + (head_foot_pad * 2)
+        height = current_y + (head_foot_pad * 2)
 
         img = Image.new('L', (width, height), 255)
         draw = ImageDraw.Draw(img)
 
-        current_height = head_foot_pad
+        # write one line at a time
+        """
+        current_y = head_foot_pad
+
         for line in doc:
             text_w, text_h = draw.textsize(line, font=font)
-            draw.text((side_pad, current_height), line, font=font, fill=0)
-            current_height = current_height + text_h + line_buffer
+            draw.text((side_pad, current_y), line, font=font, fill=0)
+            current_y = current_y + text_h + line_buffer
+        """
+        # write one word at a time - works pretty decently
+        current_y = head_foot_pad
+        current_x = side_pad
+        space = 25
+
+        for line in doc:
+            max_height = 0
+            for word in line.split():
+                text_w, text_h = draw.textsize(word, font=font)
+                if text_h > max_height:
+                    max_height = text_h
+                draw.text((current_x, current_y), word, font=font, fill=0)
+                current_x = current_x + text_w + space
+            current_x = side_pad
+            current_y = current_y + max_height + line_buffer
         
+        # one letter at a time doesn't work well
+        """
+        current_y = head_foot_pad
+        current_x = side_pad
+        for line in doc:
+            for letter in line:
+                text_w, text_h = draw.textsize(letter, font=font)
+                draw.text((current_x, current_y), letter, font=font, fill=0)
+                current_x += text_w
+            current_x = side_pad
+            current_y = current_y + text_h + line_buffer
+        """
+
         return img
 
     except Exception as e:
