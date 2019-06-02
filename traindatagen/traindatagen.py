@@ -9,7 +9,6 @@ import traceback
 from random import randint
 
 from PIL import Image, ImageDraw, ImageFont
-import numpy as np
 
 def format_line(line, max_width=90):
     ''' Ensures that lines of text terminate reasonably even if document has no newlines '''
