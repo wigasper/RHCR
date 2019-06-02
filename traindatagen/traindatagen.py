@@ -49,10 +49,28 @@ def get_doc_dimensions(doc, font, side_margin, header_margin, line_buffer):
 
     return width, height
 
-def generate_responses(word, current_x, current_y, font, text_w, responses):
-    pass
+# resp format: [doc, x, y, w, h, letter]
+def generate_responses(word, current_x, current_y, font, 
+                        connected_width, responses, doc_id):
+    img = Image.new('L', (1, 1), 255)
+    draw = ImageDraw.Draw(img)
 
-def txt_to_cursive_img(doc, logger):
+    # Get word width if letters are written individually
+    unconnected_width = 0
+    for letter in word:
+        text_w, text_h = draw.textsize(letter, font=font)
+        unconnected_width += text_w
+
+    # Proportion
+    prop =  connected_width / unconnected_width
+
+    for letter in word:
+        text_w, text_h = draw.textsize(letter, font=font)
+        responses.append([doc_id, current_x, current_y, text_w * prop, 
+                        text_h * prop, letter])
+        current_x = current_x + (text_w * prop)
+
+def txt_to_cursive_img(doc, out_path, logger):
     ''' turns a document text into cursive images using the dictionary
         :params:
             doc- list of lines of text
@@ -81,16 +99,7 @@ def txt_to_cursive_img(doc, logger):
         img = Image.new('L', (width, height), 255)
         draw = ImageDraw.Draw(img)
 
-        # write one line at a time
-        """
-        current_y = header_margin
-
-        for line in doc:
-            text_w, text_h = draw.textsize(line, font=font)
-            draw.text((side_margin, current_y), line, font=font, fill=0)
-            current_y = current_y + text_h + line_buffer
-        """
-        # write one word at a time - works pretty decently
+        # Write one word at a time and generate responses
         current_y = header_margin
         current_x = side_margin
         space = 25
@@ -104,7 +113,8 @@ def txt_to_cursive_img(doc, logger):
                 if text_h > max_height:
                     max_height = text_h
                 draw.text((current_x, current_y), word, font=font, fill=0)
-                generate_responses(word, current_x, current_y, font, text_w, responses)
+                generate_responses(word, current_x, current_y, font, 
+                            text_w, responses, out_path)
                 current_x = current_x + text_w + space
             current_x = side_margin
             current_y = current_y + max_height + line_buffer
@@ -166,10 +176,17 @@ def main():
     
     # Change each letter to a cursive image
     logger.info('converting string doc to cursive images')
-    out, response_vals, font = txt_to_cursive_img(doc, logger)
+    out, responses, font = txt_to_cursive_img(doc, out_path, logger)
     
     out.save(f"{out_path}")
     logger.info(f"Translated {in_path} to {out_path} using {font}")
+
+    # [doc, x, y, w, h, letter]
+    with open("responses.csv", "r") as out:
+        for line in responses:
+            out.write(",".join([responses[0], responses[1], responses[2],
+                        responses[3], responses[4], responses[5]]))
+            out.write("\n")
     
 if __name__ == '__main__':
     main()
