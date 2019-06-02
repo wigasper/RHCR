@@ -66,9 +66,9 @@ def generate_responses(word, current_x, current_y, font,
 
     for letter in word:
         text_w, text_h = draw.textsize(letter, font=font)
-        responses.append([doc_id, current_x, current_y, text_w * prop, 
-                        text_h * prop, letter])
-        current_x = current_x + (text_w * prop)
+        responses.append([doc_id, current_x, current_y, current_x +  int(text_w * prop), 
+                        current_y + text_h, letter])
+        current_x = current_x + int(text_w * prop)
 
 def txt_to_cursive_img(doc, out_path, logger):
     ''' turns a document text into cursive images using the dictionary
@@ -182,10 +182,10 @@ def main():
     logger.info(f"Translated {in_path} to {out_path} using {font}")
 
     # [doc, x, y, w, h, letter]
-    with open("responses.csv", "r") as out:
-        for line in responses:
-            out.write(",".join([responses[0], responses[1], responses[2],
-                        responses[3], responses[4], responses[5]]))
+    with open("responses.tab", "w") as out:
+        for resp in responses:
+            out.write("\t".join([resp[0], str(resp[1]), str(resp[2]),
+                        str(resp[3]), str(resp[4]), resp[5]]))
             out.write("\n")
     
 if __name__ == '__main__':
