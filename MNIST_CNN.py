@@ -1,3 +1,5 @@
+#### WARNING DEPRECATED USING TENSORFLOW 2 NOW ###
+print("WARNING DEPRECATED USING TENSORFLOW 2 NOW") 
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
