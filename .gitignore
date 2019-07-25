@@ -1,8 +1,10 @@
-/traindatagen/ru_wiki/ruwiki
-/traindatagen/ru_wiki/generated_text
+traindatagen/ru_wiki/ruwiki
+traindatagen/ru_wiki/generated_text
 *.test
 *.log
 */*.test
+responses.tab
+traindatagen/responses.tab
 
 # Created by https://www.gitignore.io/api/git,linux,macos,python,images,windows,sublimetext,visualstudiocode
 # Edit at https://www.gitignore.io/?templates=git,linux,macos,python,images,windows,sublimetext,visualstudiocode
