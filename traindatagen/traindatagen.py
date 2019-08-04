@@ -6,7 +6,7 @@ import logging
 import argparse
 import traceback
 from random import randint
-
+import threading
 from PIL import Image, ImageDraw, ImageFont
 
 def format_line(line, max_width=90):
@@ -107,6 +107,9 @@ def txt_to_cursive_img(doc, out_path, logger):
         # pixel value of header and foot margins
         header_margin = 40
 
+        # number of threads
+        thread_count = 5
+
         # Get a random font
         fonts = os.listdir("./fonts")
         font = ImageFont.truetype(f"./fonts/{fonts[randint(0, len(fonts) - 1)]}", 120)
@@ -117,9 +120,8 @@ def txt_to_cursive_img(doc, out_path, logger):
         img = Image.new('L', (width, height), 255)
         draw = ImageDraw.Draw(img)
 
-        # Write one word at a time and generate responses
-        current_y = header_margin
-        current_x = side_margin
+        current_y = 0 + header_margin
+        current_x = 0 + side_margin
         space = 25
 
         responses = []

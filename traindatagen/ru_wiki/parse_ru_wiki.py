@@ -1,5 +1,14 @@
 #!/usr/bin/env python3
 from random import random, randint
+import logging
+from logging.handlers import RotatingFileHandler
+import argparse
+
+
+valid_letters = "абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ "
+
+identifier = 0
+out = ""
 
 def random_punctuator(word):
     if random() < .08:
@@ -28,26 +37,50 @@ def format_line(line, max_width=50):
             line = line[1:]
         yield out
 
-valid_letters = "абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ "
+def write_to_text(inputFile, log):
+    log.info('starting write_to_text')
+    with open(inputFile, "r") as fp:
+        for line in fp:
+            if len(out) > 990:
+                outFile = f"./generated_text/{str(identifier).zfill(7)}.txt"
+                log.info(f"writing to output file: {outFile}")
+                with open(outFile, "w") as fp:
+                    for out_line in format_line(out): # NOTE(rgasper) this could be turned into a oneliner with less punctuation
+                        fp.write("".join([out_line, "\n"]))
+                identifier += 1
+                out = ""
+            line_out = ""
+            for char in line:
+                if char in valid_letters:
+                    line_out = "".join([line_out, char])
+            line_out = line_out.split()
+            if random() < .007:
+                line_out.append(str(randint(0, 10000)))
+            line_out = " ".join(line_out)
+            if line_out:        
+                out = " ".join([out, line_out])
 
-identifier = 0
-out = ""
+def getArgs():
+    ''' used to get command-line arguments when run standalone '''
+    parser = argparse.ArgumentParser(description='Does some sanitization of target russian-language wikipedia archive file for ML training purposes')
+    parser.add_argument('-i', '--inputFiles', nargs='+', type=str,
+                        help='file(s) to process. standard bash syntax')
+    return parser.parse_args()
 
-with open("ruwiki.test", "r") as fp:
-    for line in fp:
-        if len(out) > 990:
-            with open(f"./generated_text/{str(identifier).zfill(7)}.txt", "w") as fp:
-                for out_line in format_line(out):
-                    fp.write("".join([out_line, "\n"]))
-            identifier += 1
-            out = ""
-        line_out = ""
-        for char in line:
-            if char in valid_letters:
-                line_out = "".join([line_out, char])
-        line_out = line_out.split()
-        if random() < .007:
-            line_out.append(str(randint(0, 10000)))
-        line_out = " ".join(line_out)
-        if line_out:        
-            out = " ".join([out, line_out])
+def getLog():
+    ''' used to initialize logger when run standalone '''
+    logfile = 'log_parse_ru_wiki'
+    logging.basicConfig(
+            format='[%(levelname)s] - [%(module)s:%(lineno)d] %(asctime)s - %(message)s',
+            level=logging.DEBUG,
+            datefmt='%Y-%m-%d %H:%M:%S')
+    log = logging.getLogger(logfile)
+    log.addHandler(RotatingFileHandler(logfile, mode='a', backupCount=14)) # will keep 14 backup logs: log.1, log.2 ... log.
+    log.handlers[0].doRollover() # make a new log each time
+    return log
+
+if __name__ == '__main__':
+    args = getArgs()
+    log = getLog()
+    for inputFile in args.inputFiles:
+        log.info(f'running {__name__} as main file on input {inputFile}')
