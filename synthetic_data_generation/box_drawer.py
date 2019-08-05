@@ -30,3 +30,4 @@ def getArgs():
 
 if __name__ == '__main__':
     args = getArgs()
+    box_drawer(args.imageFile, args.targetsFile, args.outFile)
