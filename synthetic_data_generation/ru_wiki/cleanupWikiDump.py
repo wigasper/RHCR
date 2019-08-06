@@ -13,6 +13,7 @@ identifier = 0
 out = ""
 
 def random_punctuator(word):
+    ''' cus we don't allow punctuation, just add some in randomly '''
     if random() < .08:
         return "".join([word, ","])
     if random() < .066:
@@ -39,7 +40,7 @@ def format_line(line, max_width=50):
             line = line[1:]
         yield out
 
-def write_to_text(inputFile, outputFile):
+def cleanup_and_write(inputFile, outputFile):
     log.info('starting write_to_text')
     with open(inputFile, "r") as fp:
         for line in fp:
@@ -92,5 +93,5 @@ if __name__ == '__main__':
         pass
     for inputFile in args.inputFiles:
         log.info(f'running {__name__} as main file on input {inputFile}')
-        write_to_text(inputFile, args.outputFile)
+        cleanup_and_write(inputFile, args.outputFile)
 
