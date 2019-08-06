@@ -3,7 +3,9 @@ from random import random, randint
 import logging
 from logging.handlers import RotatingFileHandler
 import argparse
+import os
 
+global log
 
 valid_letters = "абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ "
 
@@ -37,14 +39,13 @@ def format_line(line, max_width=50):
             line = line[1:]
         yield out
 
-def write_to_text(inputFile, log):
+def write_to_text(inputFile, outputFile):
     log.info('starting write_to_text')
     with open(inputFile, "r") as fp:
         for line in fp:
             if len(out) > 990:
-                outFile = f"./generated_text/{str(identifier).zfill(7)}.txt"
-                log.info(f"writing to output file: {outFile}")
-                with open(outFile, "w") as fp:
+                log.info(f"writing to output file: {outputFile}")
+                with open(outputFile, "a") as fp:
                     for out_line in format_line(out): # NOTE(rgasper) this could be turned into a oneliner with less punctuation
                         fp.write("".join([out_line, "\n"]))
                 identifier += 1
@@ -65,6 +66,8 @@ def getArgs():
     parser = argparse.ArgumentParser(description='Does some sanitization of target russian-language wikipedia archive file for ML training purposes')
     parser.add_argument('-i', '--inputFiles', nargs='+', type=str,
                         help='file(s) to process. standard bash syntax')
+    parser.add_argument('-o', '--outputFile', nargs=1, type=str, default='parsed.txt',
+                        help='file to output text to')
     return parser.parse_args()
 
 def getLog():
@@ -75,12 +78,19 @@ def getLog():
             level=logging.DEBUG,
             datefmt='%Y-%m-%d %H:%M:%S')
     log = logging.getLogger(logfile)
-    log.addHandler(RotatingFileHandler(logfile, mode='a', backupCount=14)) # will keep 14 backup logs: log.1, log.2 ... log.
+    log.addHandler(RotatingFileHandler(logfile, mode='a', backupCount=3))
     log.handlers[0].doRollover() # make a new log each time
     return log
 
 if __name__ == '__main__':
     args = getArgs()
+    global log
     log = getLog()
+    try:
+        os.remove(args.outputFile)
+    except OSError:
+        pass
     for inputFile in args.inputFiles:
         log.info(f'running {__name__} as main file on input {inputFile}')
+        write_to_text(inputFile, args.outputFile)
+
