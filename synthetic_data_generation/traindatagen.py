@@ -63,7 +63,7 @@ def generate_responses(word, current_x, current_y, font,
     '''
     # tuning value adds pixels to every side of the box to improve
     # letter containment
-    box_tuner = 6
+    box_tuner = 8
 
     responses = []
 
@@ -81,6 +81,8 @@ def generate_responses(word, current_x, current_y, font,
 
     for letter in word:
         text_w, text_h = draw.textsize(letter, font=font)
+        #width_midpoint = text_w / 2
+        #left_x = 
         # resp format: [doc, x0, y0, x1, y1, letter]
         responses.append([doc_id, current_x - box_tuner, current_y - box_tuner, 
                         current_x + int(text_w * prop) + box_tuner, 
