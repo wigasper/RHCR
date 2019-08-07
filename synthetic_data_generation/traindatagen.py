@@ -65,6 +65,9 @@ def generate_responses(word, current_x, current_y, font,
     # letter containment
     box_tuner = 8
 
+    # these letters need their bounding boxes shifted because they hang to the left
+    descenders = ["у", "з", "р", "г"]
+
     responses = []
 
     img = Image.new('L', (1, 1), 255)
@@ -83,6 +86,9 @@ def generate_responses(word, current_x, current_y, font,
         text_w, text_h = draw.textsize(letter, font=font)
         #width_midpoint = text_w / 2
         #left_x = 
+        if letter in descenders:
+            current_x = current_x - int(text_w * .25)
+            text_w += text_w * .25
         # resp format: [doc, x0, y0, x1, y1, letter]
         responses.append([doc_id, current_x - box_tuner, current_y - box_tuner, 
                         current_x + int(text_w * prop) + box_tuner, 
